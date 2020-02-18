@@ -146,6 +146,27 @@ int main(int argc, char* argv[]) {
 void print_model(void) {
     cout << "Model:" << endl;
     cout << *currentModel << endl;
+    
+    cout << "\nDict encoding:" << endl;
+    
+    std::vector<Variable>variables = (*currentModel).variables();
+    
+    std::vector<Variable>::iterator it;
+    
+    cout << "{";
+    for (it = variables.begin(); it != variables.end() ; ++it) {
+      //cout << *it << ": " << (*currentModel)[*it] << endl;
+      double value = (*currentModel)[*it].lb();
+      if (isinf(value)) value = (*currentModel)[*it].ub();
+      if (isinf(value)) value = 0;
+      cout << "\"" << *it << "\": " << value << ", ";
+    }
+    cout << "}" << endl;
+
+//    for (it = (*currentModel).variables().begin(); it != (*currentModel).variables().end() ; ++it) {
+//      cout << "blabla" << endl;
+//    }
+
     /*
     std::map<string, Variable>::iterator it;
     for (it = variables.begin(); it != variables.end() ; ++it) {
