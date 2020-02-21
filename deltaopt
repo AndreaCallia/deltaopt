@@ -9,7 +9,7 @@ from argparse import ArgumentParser
 from optstack import utils
 from sympy import sympify
 
-argv[0] = 'manyopt'
+argv[0] = 'deltaopt'
 
 defaultVerbose = 1
 defaultAccuracy = 0.01
@@ -164,17 +164,17 @@ echo -n "Cleaning up..."
 kill_children "$$"
 clean_tempfiles
 echo "done."
-exit_manyopt 1
+exit_deltaopt 1
 }
 
-exit_manyopt() {
+exit_deltaopt() {
 end_time=$(date +%s)
 duration=$((end_time - beginning_time))
 duration_h=$((duration / 3600))
 duration_hr=$((duration % 3600))
 duration_m=$((duration_hr / 60))
 duration_s=$((duration_hr % 60))
-printf "Total time for manyopt: %02dh%02dm%02ds\n" ${duration_h} ${duration_m} ${duration_s}
+printf "Total time for deltaopt: %02dh%02dm%02ds\n" ${duration_h} ${duration_m} ${duration_s}
 echo "In seconds: $duration"
 exit $1
 }
@@ -195,7 +195,7 @@ outparse=$(python -c "$cmdparse_py" $@)
 if [ "$?" != 0 ]
 then
   echo "Error in parsing arguments. Exiting..."
-  exit_manyopt 1
+  exit_deltaopt 1
 fi
 
 askhelp=$(asking_help $@)
@@ -203,7 +203,7 @@ askhelp=$(asking_help $@)
 if [ "$askhelp" == "True" ]
 then
   echo "$outparse"
-  exit_manyopt 0
+  exit_deltaopt 0
 fi
 
 options=$(echo "$outparse" | sed -n 1p)
@@ -229,7 +229,7 @@ else
   if [ "$solver" == "smtpipe" ] || [ "$solver" == "pysmtpipe" ]
   then
     echo "Error. If 'smtpipe' or 'pysmtpipe' solvers are selected, then options -p or --pipe-to must be used. Use --help for details."
-    exit_manyopt 1
+    exit_deltaopt 1
   fi
 fi
 
@@ -241,7 +241,7 @@ else
   if [ "$solver" == "smtpipe" ] || [ "$solver" == "pysmtpipe" ]
   then
     echo "Error. If 'smtpipe' or 'pysmtpipe' solvers are selected, then a logic (e.g. QF_NRA) must be used. Use --help for details."
-    exit_manyopt 1
+    exit_deltaopt 1
   fi
 fi
 
@@ -303,7 +303,7 @@ then
   clean_tempfiles
   echo "done."
   echo "Exiting..."
-  exit_manyopt
+  exit_deltaopt
 fi
 if [ ! -s $bench.var ]
 then
@@ -383,9 +383,9 @@ do
 done
 # optresult="UNSOLVED"
 if [ -f par.done ] ; then optresult="SOLVED by $(cat par.done)" ; else optresult="UNSOLVED" ; fi
-echo "[$(date '+%F, %T')] Executed manyopt on benchmark $benchname: $optresult" >> manyopt.log
-if [ $count_error -gt 0 ] ; then echo "Errors in approaches:$errorlist" >> manyopt.log ; fi
-if [ $count_unknown -gt 0 ] ; then echo "Unknown in approaches:$unknownlist" >> manyopt.log ; fi
+echo "[$(date '+%F, %T')] Executed deltaopt on benchmark $benchname: $optresult" >> deltaopt.log
+if [ $count_error -gt 0 ] ; then echo "Errors in approaches:$errorlist" >> deltaopt.log ; fi
+if [ $count_unknown -gt 0 ] ; then echo "Unknown in approaches:$unknownlist" >> deltaopt.log ; fi
 if [ ! -f par.done ] && [ $((count_error + count_unknown)) == "$nvectors" ]
 then
   if [ "$smt_unknown" == "True" ] && [ "$all_unknown" == "True" ]
@@ -415,7 +415,7 @@ wait_file "par.done" $timeout || {
   kill_children "$$"
   save_errors
   echo "done."
-  exit_manyopt 1
+  exit_deltaopt 1
 }
 
 echo "done."
@@ -459,7 +459,7 @@ fi
   
 wait "$errcatchpid"
   
-echo "manyopt has executed $nvectors feature vectors."
+echo "deltaopt has executed $nvectors feature vectors."
 approach=$(cat par.done)
 if [ "$approach" == UNKNOWN ]
 then
@@ -494,9 +494,9 @@ then
   if [ "$no_stop" == True ]
   then
     echo "The fastest feature vector is: $approach"
-    exit_manyopt 0
+    exit_deltaopt 0
   else
-    exit_manyopt 1
+    exit_deltaopt 1
   fi
 fi
 echo "Solution found by: $approach"
@@ -513,4 +513,4 @@ echo "done."
 # wait_file "par.done" 2 || exit 0
 # rm -f par.done
 
-exit_manyopt 0
+exit_deltaopt 0
