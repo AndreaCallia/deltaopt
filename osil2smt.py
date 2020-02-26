@@ -53,11 +53,11 @@ def smt_val(f):
   if (f == None):
     return None
   if (type(f) == str):
-    if f.lower() in ["inf", "-inf"]:
+    if f.lower() in ["infinity", "-infinity", "inf", "-inf"]:
       return None
     return f.replace("E", "e")
   s = str(f)
-  if s.lower() in ["inf", "-inf"]:
+  if s.lower() in ["infinity", "-infinity", "inf", "-inf"]:
     return None
   return s.replace("E", "e")
 
@@ -197,9 +197,9 @@ def parse_variables(variables):
     if (vtype == "C"):
       lb = "0.0"
     if "lb" in var.attrib:
-      lb = Decimal(var.attrib["lb"])
+      lb = smt_val(Decimal(var.attrib["lb"]))
     if "ub" in var.attrib:
-      ub = Decimal(var.attrib["ub"])
+      ub = smt_val(Decimal(var.attrib["ub"]))
     if (vtype == "B"):
       if (osil2smt["B"] != "Bool"):
         lb = "0.0"
