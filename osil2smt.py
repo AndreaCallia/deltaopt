@@ -3,6 +3,7 @@
 import xml.etree.ElementTree as ET
 import sys
 import os
+from decimal import Decimal
 
 #Options
 pysmt=False
@@ -49,6 +50,18 @@ def is_int(s):
         return False
 
 def smt_val(f):
+  if (f == None):
+    return None
+  if (type(f) == str):
+    if f.lower() in ["inf", "-inf"]:
+      return None
+    return f.replace("E", "e")
+  s = str(f)
+  if s.lower() in ["inf", "-inf"]:
+    return None
+  return s.replace("E", "e")
+
+def old_smt_val(f):
   global pysmt
   if (f == None):
     return None
@@ -183,9 +196,9 @@ def parse_variables(variables):
     if (vtype == "C"):
       lb = "0.0"
     if "lb" in var.attrib:
-      lb = float(var.attrib["lb"])
+      lb = Decimal(var.attrib["lb"])
     if "ub" in var.attrib:
-      ub = float(var.attrib["ub"])
+      ub = Decimal(var.attrib["ub"])
     if (vtype == "B"):
       if (osil2smt["B"] != "Bool"):
         lb = "0.0"
@@ -231,11 +244,11 @@ def parse_objectives(objectives):
     # print "objective " + name + ", direction: " + attrib_of[-1]["maxOrMin"]
     if "constant" in obj.attrib :
       addends = attrib_of_con[-1]["SMTaddends"]
-      attrib_of_con[-1]["SMTaddends"] = addends + [smt_val(float(obj.attrib["constant"]))]
+      attrib_of_con[-1]["SMTaddends"] = addends + [smt_val(Decimal(obj.attrib["constant"]))]
     for coef in obj:
       if coef.tag == URIadd("coef"):
-	addends = attrib_of_con[-1]["SMTaddends"]
-	attrib_of_con[-1]["SMTaddends"] = addends + ["(* " + smt_val(float(coef.text)) + " " + attrib_of[int(coef.attrib["idx"])]["smt_name"] + ")"]
+	    addends = attrib_of_con[-1]["SMTaddends"]
+	    attrib_of_con[-1]["SMTaddends"] = addends + ["(* " + smt_val(Decimal(coef.text)) + " " + attrib_of[int(coef.attrib["idx"])]["smt_name"] + ")"]
     # print >>out, "(declare-const " + name + " Real)"
     # print >>out, ""
 
@@ -252,9 +265,9 @@ def parse_constraints(constraints):
     lb = None
     ub = None
     if "lb" in con.attrib:
-      lb = smt_val(float(con.attrib["lb"]))
+      lb = smt_val(Decimal(con.attrib["lb"]))
     if "ub" in con.attrib:
-      ub = smt_val(float(con.attrib["ub"]))
+      ub = smt_val(Decimal(con.attrib["ub"]))
     index_of_con[name] = index_count
     attrib_of_con[index_count] = {}
     attrib_of_con[index_count]["name"] = name
@@ -311,7 +324,7 @@ def parse_linear_coefficients(coefficients):
   start = populate_array(coefficients.find(URIadd("start")), int)
   colIdx = populate_array(coefficients.find(URIadd("colIdx")), int)
   rowIdx = populate_array(coefficients.find(URIadd("rowIdx")), int)
-  value = populate_array(coefficients.find(URIadd("value")), float)
+  value = populate_array(coefficients.find(URIadd("value")), Decimal)
   print "colIdx length is: " + str(len(colIdx))
   print "rowIdx length is: " + str(len(rowIdx))
   if (len(rowIdx) > 0 and len(colIdx) > 0):
@@ -333,9 +346,9 @@ def parse_quadratic_coefficients(coefficients):
       index = int(qterm.attrib["idx"])
       addends = attrib_of_con[index]["SMTaddends"]
       if pysmt:
-        attrib_of_con[index]["SMTaddends"] = addends + ["(* " + smt_val(float(qterm.attrib["coef"])) + " (* " + attrib_of[int(qterm.attrib["idxOne"])]["smt_name"] + " " + attrib_of[int(qterm.attrib["idxTwo"])]["smt_name"] + "))"]
+        attrib_of_con[index]["SMTaddends"] = addends + ["(* " + smt_val(Decimal(qterm.attrib["coef"])) + " (* " + attrib_of[int(qterm.attrib["idxOne"])]["smt_name"] + " " + attrib_of[int(qterm.attrib["idxTwo"])]["smt_name"] + "))"]
       else:
-        attrib_of_con[index]["SMTaddends"] = addends + ["(* " + smt_val(float(qterm.attrib["coef"])) + " " + attrib_of[int(qterm.attrib["idxOne"])]["smt_name"] + " " + attrib_of[int(qterm.attrib["idxTwo"])]["smt_name"] + ")"]
+        attrib_of_con[index]["SMTaddends"] = addends + ["(* " + smt_val(Decimal(qterm.attrib["coef"])) + " " + attrib_of[int(qterm.attrib["idxOne"])]["smt_name"] + " " + attrib_of[int(qterm.attrib["idxTwo"])]["smt_name"] + ")"]
 
 warning_printed = []
   
@@ -358,10 +371,10 @@ def smt_nl_conv(exp):
   if exp.tag == URIadd("variable") :
     name = attrib_of[int(exp.attrib["idx"])]["smt_name"]
     if (("coef" in exp.attrib) and (exp.attrib["coef"] != '1')):
-      return "(* " + smt_val(float(exp.attrib["coef"])) + " " + name + ")"
+      return "(* " + smt_val(Decimal(exp.attrib["coef"])) + " " + name + ")"
     return attrib_of[int(exp.attrib["idx"])]["smt_name"]
   if exp.tag == URIadd("number") :
-    return smt_val(float(exp.attrib["value"]))
+    return smt_val(Decimal(exp.attrib["value"]))
   if exp.tag == URIadd("power") and pysmt:
     base = smt_nl_conv(exp[0])
     exponent = smt_nl_conv(exp[1])
