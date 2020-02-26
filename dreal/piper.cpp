@@ -241,6 +241,12 @@ Expression tree2expr(Context& s, sp::TreeNode t, std::map<string, sp::TreeNode> 
     return x * symbolic::log((x + z) / (y + z));
   }
   
+  if ((o == "signpower") && (c.size() == 3)) {
+    auto x = tree2expr(s, c[1], let_vars);
+    auto y = tree2expr(s, c[2], let_vars);
+    return if_then_else(x >= 0, symbolic::pow(x, y), -1 * symbolic::pow(symbolic::abs(x), y));
+  }
+  
   if (smtfunc.find(o) != smtfunc.end()) return smtfunc[o](tree2expr(s, c[1], let_vars));
   
   if (is_number(v)) return Expression(atof(v.c_str()));

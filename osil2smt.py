@@ -109,7 +109,7 @@ osil2smt["divide"] = "/"
 osil2smt["power"] = "^"
 
 # Nonlinear operators
-nonlinear = ["abs", "exp", "sin", "cos" "sqrt", "centropy", "ln", "log10", "log2", "logv"]
+nonlinear = ["abs", "exp", "sin", "cos" "sqrt", "centropy", "ln", "log10", "log2", "logv", "min", "max", "signpower"]
 
 osil2smt["abs"] = "Abs"
 osil2smt["exp"] = "exp"
@@ -120,6 +120,9 @@ osil2smt["ln"] = "log"
 osil2smt["log10"] = "log10"
 osil2smt["log2"] = "log2"
 osil2smt["logv"] = "logv"
+osil2smt["min"] = "Min"
+osil2smt["max"] = "Max"
+osil2smt["signpower"] = "signpower"
 
 # Experimental operators: we don't know
 # yet whether they work
