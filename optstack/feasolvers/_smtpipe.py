@@ -6,6 +6,7 @@ import subprocess
 # from sympy import simplify
 from sympy import sympify, Integer, Rational
 from sympy import Rational
+from sympy import Function
 from nltk import Tree
 
 obj_keyword = ";obj_smt="
@@ -121,6 +122,8 @@ def configure(inpcode, options):
       verbprint(2, "\nThe objective is: " + objstring, True)
       verbprint(2, "Infix notation: " + str(tree_to_infix(Tree.fromstring(objstring))), True)
       objective = sympify(tree_to_infix(Tree.fromstring(objstring)), evaluate=False, rational=enablerational)
+      objective.replace(Function("centropy"), lambda x, y, z = 1e-20 : x * sympify("log")((x + z) / (y + z)))
+      objective.replace(Function("signpower"), lambda x, y : sympify("ITE")(x >= 0, x**y, -1*(sympify("Abs")(x)**y)))
   verbprint(2, "done.", True)
   inpcode.replace("\n", " ")
   verbprint(2, "Parsing the input...", False)
