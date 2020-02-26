@@ -96,7 +96,7 @@ osil2smt["divide"] = "/"
 osil2smt["power"] = "^"
 
 # Nonlinear operators
-nonlinear = ["abs", "exp", "sin", "sqrt"]
+nonlinear = ["abs", "exp", "sin", "sqrt", "centropy"]
 
 osil2smt["abs"] = "Abs"
 osil2smt["exp"] = "exp"
