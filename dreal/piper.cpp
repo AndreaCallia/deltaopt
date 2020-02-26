@@ -225,6 +225,10 @@ Expression tree2expr(Context& s, sp::TreeNode t, std::map<string, sp::TreeNode> 
 
   if (o == "^") return symbolic::pow(tree2expr(s, c[1], let_vars), tree2expr(s, c[2], let_vars));
   
+  if ((o == "log10") && (c.size() == 2)) return symbolic::log(tree2expr(s, c[1], let_vars)) / symbolic::log(10);
+  if ((o == "log2") && (c.size() == 2)) return symbolic::log(tree2expr(s, c[1], let_vars)) / symbolic::log(2);
+  if ((o == "logv") && (c.size() == 3)) return symbolic::log(tree2expr(s, c[2], let_vars)) / symbolic::log(tree2expr(s, c[1], let_vars));
+  
   if ((o == "centropy") && (c.size() >= 3) && (c.size() <= 4)) {
     auto z = 1e-20;
     auto x = tree2expr(s, c[1], let_vars);
