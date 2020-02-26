@@ -65,9 +65,12 @@ def tree_to_infix(t):
     return t
   s = '('
   if (t.label()) in ['+', '-', '*', '/', '^']:
-    s += tree_to_infix(t[0])
-    for o in t[1:]:
-      s += ' ' + t.label() + ' ' + tree_to_infix(o)
+    if (len(t) == 1):
+      s += t.label() + ' ' + tree_to_infix(t[0])
+    else:
+      s += tree_to_infix(t[0])
+      for o in t[1:]:
+        s += ' ' + t.label() + ' ' + tree_to_infix(o)
 #  elif (t.label()) in nonlinear:
 #    s += t.label() + "(" + tree_to_infix(t[0])
 #    for o in t[1:]:
