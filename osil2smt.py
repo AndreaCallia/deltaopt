@@ -110,6 +110,7 @@ osil2smt["power"] = "^"
 
 # Nonlinear operators
 nonlinear = ["abs", "exp", "sin", "cos" "sqrt", "centropy", "ln", "log10", "log2", "logv", "min", "max", "signpower"]
+nonlinear += ["tan", "asin", "acos", "atan", "atan2", "sinh", "cosh", "tanh"]
 
 osil2smt["abs"] = "Abs"
 osil2smt["exp"] = "exp"
@@ -123,6 +124,15 @@ osil2smt["logv"] = "logv"
 osil2smt["min"] = "Min"
 osil2smt["max"] = "Max"
 osil2smt["signpower"] = "signpower"
+
+osil2smt["tan"] = "tan"
+osil2smt["asin"] = "asin"
+osil2smt["acos"] = "acos"
+osil2smt["atan"] = "atan"
+osil2smt["atan2"] = "atan2"
+osil2smt["sinh"] = "sinh"
+osil2smt["cosh"] = "cosh"
+osil2smt["tanh"] = "tanh"
 
 # Experimental operators: we don't know
 # yet whether they work
