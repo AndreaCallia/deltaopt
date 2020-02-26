@@ -224,7 +224,15 @@ Expression tree2expr(Context& s, sp::TreeNode t, std::map<string, sp::TreeNode> 
   // if (o == "/") return (tree2expr(s, c[1], let_vars) / tree2expr(s, c[2], let_vars));
 
   if (o == "^") return symbolic::pow(tree2expr(s, c[1], let_vars), tree2expr(s, c[2], let_vars));
-
+  
+  if ((o == "centropy") && (c.size() >= 3) && (c.size() <= 4)) {
+    auto z = 1e-20;
+    auto x = tree2expr(s, c[1], let_vars);
+    auto y = tree2expr(s, c[2], let_vars);
+    if (c.size() == 4) auto z = tree2expr(s, c[3], let_vars);
+    return x * symbolic::log((x + z) / (y + z));
+  }
+  
   if (smtfunc.find(o) != smtfunc.end()) return smtfunc[o](tree2expr(s, c[1], let_vars));
   
   if (is_number(v)) return Expression(atof(v.c_str()));
