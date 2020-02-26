@@ -37,6 +37,8 @@ std::map<string, std::function<symbolic::Expression(symbolic::Expression)>> smtf
 
 std::map<string, std::function<symbolic::Expression(void)>> smtconst;
 
+//sympify("somma(3,5)").replace(Function("somma"), lambda x, y: x + y)
+
 void populate_smtmaps(void) {
   smtconst["smt_pi"] = symbolic::Expression::Pi;
   smtconst["smt_e"] = symbolic::Expression::E;
@@ -204,13 +206,15 @@ Expression tree2expr(Context& s, sp::TreeNode t, std::map<string, sp::TreeNode> 
 
   if ((o == "-") && (c.size() == 2)) return ( - tree2expr(s, c[1], let_vars));
 
-  if (((o == "+") || (o == "-") || (o == "*") || (o == "/")) && (c.size() > 2)) {
+  if (((o == "+") || (o == "-") || (o == "*") || (o == "/") || (o == "Min") || (o == "Max")) && (c.size() > 2)) {
     Expression e = tree2expr(s, c[1], let_vars);
     for (int i = 2; i < c.size() ; i++) {
       if (o == "+") e = e + tree2expr(s, c[i], let_vars);
       else if (o == "-") e = e - tree2expr(s, c[i], let_vars);
       else if (o == "*") e = e * tree2expr(s, c[i], let_vars);
       else if (o == "/") e = e / tree2expr(s, c[i], let_vars);
+      else if (o == "Min") e = symbolic::min(e, tree2expr(s, c[i], let_vars));
+      else if (o == "Max") e = symbolic::max(e, tree2expr(s, c[i], let_vars));
     }
     return e;
   }
