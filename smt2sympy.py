@@ -9,12 +9,14 @@ def tree_to_infix(t):
     return t
   s = '('
   if (t.label()) in ['+', '-', '*', '/', '^', '=', '>', '<', '>=', '<=']:
+    op = t.label()
+    if (op == '='): op = '=='
     if (len(t) == 1):
-      s += t.label() + ' ' + tree_to_infix(t[0])
+      s += op + ' ' + tree_to_infix(t[0])
     else:
       s += tree_to_infix(t[0])
       for o in t[1:]:
-        s += ' ' + t.label() + ' ' + tree_to_infix(o)
+        s += ' ' + op + ' ' + tree_to_infix(o)
   elif (t.label() == 'centropy'):
     x = tree_to_infix(t[0])
     y = tree_to_infix(t[1])
