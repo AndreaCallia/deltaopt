@@ -113,8 +113,14 @@ def makeplot(statlist, unsolved):
   #plt.show()
   plt.savefig('stats/stats.png')
 
-def filterlist(l, cat):
+def filterbycat(l, cat):
   return list(filter(lambda d: d["Category"] in cat, l))
+
+def filterbysize(l, size_l, size_u):
+  # print "Length of l: " + str(len(l))
+  # print "size_l: " + str(size_l)
+  # print "size_u: " + str(size_u)
+  return list(filter(lambda d: (size_l <= float(d["Size"])) and (float(d["Size"]) <= size_u), l))
 
 mkdir_p("stats")
 
@@ -153,8 +159,14 @@ if (sys.argv[1] == "--sort"):
 
 f = open(sys.argv[1], "r")
 filtercat = categories
-if (len(sys.argv) == 3):
+filtersizelow = float('-inf')
+filtersizeup = float('inf')
+if (len(sys.argv) >= 3):
   filtercat = eval(sys.argv[2])
+if (len(sys.argv) >= 4):
+  filtersizelow = float(sys.argv[3])
+if (len(sys.argv) >= 5):
+  filtersizeup = float(sys.argv[4])
 lines = f.readlines()
 looking_for_details = False
 looking_for_solver = False
@@ -257,8 +269,12 @@ while (i < len(lines)):
 if (byname):
   unsolvedlist = [unsolvdict[k] for k in sorted(unsolvdict)]
   solvedlist = [solvdict[k] for k in sorted(solvdict)]
-f_unsolvedlist = filterlist(unsolvedlist, filtercat)
-f_solvedlist = filterlist(solvedlist, filtercat)
+f_unsolvedlist = filterbycat(unsolvedlist, filtercat)
+f_solvedlist = filterbycat(solvedlist, filtercat)
+f_unsolvedlist = filterbysize(f_unsolvedlist, filtersizelow, filtersizeup)
+f_solvedlist = filterbysize(f_solvedlist, filtersizelow, filtersizeup)
+# print "Length (unsolved): " + str(len(f_unsolvedlist))
+# print "Length (solved): " + str(len(f_solvedlist))
 f_unsolvdict = {}
 f_solvdict = {}
 for b in f_unsolvedlist:

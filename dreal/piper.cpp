@@ -37,8 +37,6 @@ std::map<string, std::function<symbolic::Expression(symbolic::Expression)>> smtf
 
 std::map<string, std::function<symbolic::Expression(void)>> smtconst;
 
-//sympify("somma(3,5)").replace(Function("somma"), lambda x, y: x + y)
-
 void populate_smtmaps(void) {
   smtconst["smt_pi"] = symbolic::Expression::Pi;
   smtconst["smt_e"] = symbolic::Expression::E;
@@ -294,8 +292,8 @@ bool add_assert(Context& s, sp::TreeNode t) {
     std::map<string, sp::TreeNode> let_vars;
     *e = tree2formula(s, c[1], let_vars);
     // FOR DEBUGGING:
-    cerr << "Adding the following formula:" << endl;
-    cerr << *e << endl;
+    //cerr << "Adding the following formula:" << endl;
+    //cerr << *e << endl;
     parsed.push_back(*e);
     s.Assert(*e);
     success = "success\n";
