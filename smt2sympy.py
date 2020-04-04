@@ -3,32 +3,49 @@
 from sys import argv
 from nltk import Tree
 
+relmap = {}
+relmap['='] = 'Eq'
+relmap['!='] = 'Ne'
+relmap['>'] = 'Gt'
+relmap['<'] = 'Lt'
+relmap['>='] = 'Ge'
+relmap['<='] = 'Le'
+
+#   'Rel', 'Eq', 'Ne', 'Lt', 'Le', 'Gt', 'Ge',
+#    'Relational', 'Equality', 'Unequality', 'StrictLessThan', 'LessThan',
+#    'StrictGreaterThan', 'GreaterThan',
+
 
 def tree_to_infix(t):
+  global relmap
   if isinstance(t, basestring):
     return t
   s = '('
-  if (t.label()) in ['+', '-', '*', '/', '^', '=', '>', '<', '>=', '<=']:
-    op = t.label()
-    if (op == '='): op = '=='
+  op = t.label()
+  if (op in relmap):
+    op = relmap[op]
+    x = tree_to_infix(t[0])
+    y = tree_to_infix(t[1])
+    s += op + '(' + x + ', ' + y + ')'
+  elif (op) in ['+', '-', '*', '/', '^']:
     if (len(t) == 1):
       s += op + ' ' + tree_to_infix(t[0])
     else:
       s += tree_to_infix(t[0])
       for o in t[1:]:
         s += ' ' + op + ' ' + tree_to_infix(o)
-  elif (t.label() == 'centropy'):
+  elif (op == 'centropy'):
     x = tree_to_infix(t[0])
     y = tree_to_infix(t[1])
     z = '1e-20'
     if (len(t) > 2): z = tree_to_infix(t[2])
     return '(' + x + ' * (log((' + x + ' + ' + z + ') / (' + y + ' + ' + z + '))))'
-  elif (t.label() == 'signpower'):
+  elif (op == 'signpower'):
     x = tree_to_infix(t[0])
     y = tree_to_infix(t[1])
     return 'ITE(' + x + ' >= 0, (' + x + ' ^ ' + y + '), (-(Abs(' + x + ') ^ ' + y + ')))'
   else:
-    s += t.label() + '(' + tree_to_infix(t[0]) + ')'
+    s += op + '(' + tree_to_infix(t[0]) + ')'
   s += ')'
   return s
 
