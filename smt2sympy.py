@@ -64,7 +64,7 @@ def main():
       # print 'Parsing formula: ' + line
       t = Tree.fromstring(line)
       output += tree_to_infix(t[0]) + '\n'
-    elif line.startswith('; obj_smt ='):
+    elif line.startswith(objkeyword):
       t = Tree.fromstring(line[len(objkeyword):])
       output += "Obj: " + tree_to_infix(t) + '\n'
       
