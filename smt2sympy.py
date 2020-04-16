@@ -54,13 +54,20 @@ def main():
   smtlines = smtfile.readlines()
   smtfile.close()
   
+  objkeyword = '; obj_smt = '
+  
   output = ''
   
   for num, line in enumerate(smtlines):
     # print "Line " + str(num + 1)
     if line.startswith('(assert'):
+      # print 'Parsing formula: ' + line
       t = Tree.fromstring(line)
       output += tree_to_infix(t[0]) + '\n'
+    elif line.startswith('; obj_smt ='):
+      t = Tree.fromstring(line[len(objkeyword):])
+      output += "Obj: " + tree_to_infix(t) + '\n'
+      
   
   sympyfile = open(argv[1].split('.smt2')[0] + '.sympy', 'w')
   print >>sympyfile, output
@@ -68,5 +75,3 @@ def main():
 
 main()
 
-
-# Tree.fromstring("(smtcode " + f + " )")
