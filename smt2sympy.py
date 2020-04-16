@@ -1,11 +1,12 @@
 #!/usr/bin/python
 
+from sys import exit
 from sys import argv
 from nltk import Tree
 
 relmap = {}
-relmap['='] = 'Eq'
-relmap['!='] = 'Ne'
+#relmap['='] = 'Eq'
+#relmap['!='] = 'Ne'
 relmap['>'] = 'Gt'
 relmap['<'] = 'Lt'
 relmap['>='] = 'Ge'
@@ -15,6 +16,15 @@ relmap['<='] = 'Le'
 #    'Relational', 'Equality', 'Unequality', 'StrictLessThan', 'LessThan',
 #    'StrictGreaterThan', 'GreaterThan',
 
+def appdelta(op):
+  if (op in ['Gt', 'Ge']):
+    return ' - delta'
+  if (op in ['Lt', 'Le']):
+    return ' + delta'
+  print "Error, unexpected operator in appdelta(): " + str(op)
+  exit(1)
+  return None
+  
 
 def tree_to_infix(t):
   global relmap
@@ -22,11 +32,23 @@ def tree_to_infix(t):
     return t
   s = '('
   op = t.label()
-  if (op in relmap):
+  if (op == '!='):
+    gt = t.copy()
+    lt = t.copy()
+    gt.set_label('>')
+    lt.set_label('<')
+    s += 'Or(' + tree_to_infix(gt) + ', ' + tree_to_infix(lt) + ')'
+  elif (op == '='):
+    ge = t.copy()
+    le = t.copy()
+    ge.set_label('>=')
+    le.set_label('<=')
+    s += 'And(' + tree_to_infix(ge) + ', ' + tree_to_infix(le) + ')'    
+  elif (op in relmap):
     op = relmap[op]
     x = tree_to_infix(t[0])
     y = tree_to_infix(t[1])
-    s += op + '(' + x + ', ' + y + ')'
+    s += op + '(' + x + ', ' + y + appdelta(op) + ')'
   elif (op) in ['+', '-', '*', '/', '^']:
     if (len(t) == 1):
       s += op + ' ' + tree_to_infix(t[0])
