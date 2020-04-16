@@ -3,31 +3,57 @@
 import sys
 from sympy import sympify
 
+out = ''
 
 objkeyword = 'Obj: '
 
 def error(line, constring):
-  print "Error, a constraint does not evaluate as true."
-  print "Line: " + str(line)
-  print "  Constraint: " + constring
+  global out
+  out += "Error, a constraint does not evaluate as true.\n"
+  out += "Line: " + str(line) + "\n"
+  out += "  Constraint: " + constring + "\n"
 
-def check_objective(objstring, model):
-  #print "Going to parse: " + objstring
+def is_real_rec(exp, model, level):
+  global out
+  if (hasattr(exp, 'args') == False):
+    return True
+  if (exp.subs(model).is_real != True):
+    extra = ''
+    if (level > 0): extra = "a subexpression in "
+    out += "Error: The value of " + extra + "the objective is not a real value.\n"
+    out += "Unevaluated expression: " + str(exp) + "\n"
+    out += "Evaluated expression: " + str(exp.subs(model)) + "\n"
+    return False
+  result = True
+  for subexp in exp.args:
+    result = is_real_rec(subexp, model, level + 1)
+  return result
+
+def is_objective_real(objstring, model):
+  global out
+  #out += "Going to parse: " + objstring
   obj = sympify(objstring)
   error = False
   if (not hasattr(obj.subs(model), 'is_real')):
-    print "Error: The objective value not a legal expression."
-    error = True
-  if (obj.subs(model).is_real != True):
-    print "Error: The objective value is not a real value."
-    error = True
-  if (error):
-    print "Unevaluated objective: " + str(obj)
-    print "Evaluated objective: " + str(obj.subs(model))
-  return (not error)
+    out += "Error: The objective value is not a legal expression.\n"
+    out += "Unevaluated objective: " + str(obj) + "\n"
+    out += "Evaluated objective: " + str(obj.subs(model)) + "\n"
+    return False
+  return is_real_rec(obj, model, 0)
+
+def lhs(f):
+  if (hasattr(f, 'lhs')):
+    return f.lhs
+  return f.args[0].lhs
+
+def rhs(f):
+  if (hasattr(f, 'rhs')):
+    return f.rhs
+  return f.args[0].rhs
 
 def main():
   global objkeyword
+  global out
   
   problemfile=open(sys.argv[1], "r")
   problemlines = problemfile.read().splitlines()
@@ -37,29 +63,40 @@ def main():
   model = eval(modelfile.read())
   modelfile.close()
   
+  delta = 0
+  
+  if (len(sys.argv) > 3):
+    delta = float(sys.argv[3])
+    
+  model['delta'] = delta
+  
   satisfied = True
   
   for line, constring in enumerate(problemlines, 1):
     if (constring != ""):
       if (constring.startswith('Obj: ')):
-        satisfied = check_objective(constring[len(objkeyword):], model)
+        if (is_objective_real(constring[len(objkeyword):], model) != True): satisfied = False
       else:
         constraint = sympify(constring)
         if (not hasattr(constraint, 'subs')):
           if (constraint != True):
             error(line, constring)
-            print "Constraint value: " + str(constraint)
+            out += "Constraint value: " + str(constraint) + "\n"
             if (hasattr(constraint, 'subs')):
-              print "Value after substitution: " + str(constraint.subs(model))
+              out += "Value after substitution: " + str(constraint.subs(model)) + "\n"
             satisfied = False
         elif (constraint.subs(model) != True):
           error(line, constring)
-          print "  LHS Value: " + str(constraint.lhs.subs(model))
-          print "  RHS Value: " + str(constraint.rhs.subs(model))
-          print "  Constraint value: " + str(constraint.subs(model))
+          out += "  LHS Value: " + str(lhs(constraint).subs(model)) + "\n"
+          out += "  RHS Value: " + str(rhs(constraint).subs(model)) + "\n"
+          out += "  Constraint value: " + str(constraint.subs(model)) + "\n"
           satisfied = False
-
+  
+  benchname = sys.argv[1][:sys.argv[1].index('.sympy')]
   if (satisfied == True):
-    print "All constraints are satisfied by the model."
+    print "Benchmark " + benchname + ": all constraints are satisfied by the model."
+  else:
+    print "Benchmark " + benchname + ": some constraints are not satisfied by the model."
+  if (out != ''): print out
 
 main()
