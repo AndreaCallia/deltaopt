@@ -39,6 +39,7 @@ def is_objective_real(objstring, model):
     out += "Unevaluated objective: " + str(obj) + "\n"
     out += "Evaluated objective: " + str(obj.subs(model)) + "\n"
     return False
+  #print "The objective value is: " + str(obj.subs(model))
   return is_real_rec(obj, model, 0)
 
 def lhs(f):
@@ -65,6 +66,8 @@ def main():
   
   delta = 0
   
+  obj = None
+  
   if (len(sys.argv) > 3):
     delta = float(sys.argv[3])
     
@@ -76,6 +79,7 @@ def main():
     if (constring != ""):
       if (constring.startswith('Obj: ')):
         if (is_objective_real(constring[len(objkeyword):], model) != True): satisfied = False
+        else: obj = sympify(constring[len(objkeyword):]).subs(model)
       else:
         constraint = sympify(constring)
         if (not hasattr(constraint, 'subs')):
@@ -94,7 +98,7 @@ def main():
   
   benchname = sys.argv[1][:sys.argv[1].index('.sympy')]
   if (satisfied == True):
-    print "Benchmark " + benchname + ": all constraints are satisfied by the model."
+    print "Benchmark " + benchname + ": all constraints are satisfied by the model. Objective value: " + str(obj)
   else:
     print "Benchmark " + benchname + ": some constraints are not satisfied by the model."
   if (out != ''): print out
